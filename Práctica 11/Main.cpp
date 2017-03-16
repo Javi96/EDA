@@ -1,98 +1,74 @@
 #include "Racional.h"
 
-#include <iostream>
-#include <string>
-using namespace std;
+   // Codigo de prueba
+   // Procesa un archivo de entrada que incluye 0 o mas comandos de las siguiente formas: 
+   //      + f1 f2
+   //      - f1 f2
+   //      * f1 f2
+   //      / f1 f2
+   //      == f1 f2
+   // donde f1 y f2 son fracciones. Los numeradores y denominadores siempre estan en el
+   // rango de 'long', pero no se garantiza que las fracciones sean validas (puede
+   // haber fracciones con 0 en el denominador), ni que sean irreducibles.
+   // Los comandos se procesan, en orden de aparicion, como sigue:
+   //         (1) "+ f1 f1", "- f1 f1" y "* f1 f2" realiza la operacion con
+   //             las fracciones indicadas y escriben el resultado. 
+   //         (2) "/ f1 f2" se comporta igual, salvo que, si se detecta division por 0,
+   //             se escribe DIVISION_POR_CERO.
+   //         (4) "== f1 f2" compara f1 con f2 y escribe el resultado
+   //  Si durante el proceso se encuentra una fraccion no valida, se escribe
+   //       ERROR_EN_ARGUMENTO
 
-// Codigo de prueba
-// El programa se comporta como el del control 1, con la
-// salvedad de que, ahora, mantiene una 'precion' para 
-// realizar los cálculos, que indica si los cálculos deben
-// hacerse con precisión 'short', 'int' o 'long'. Se admite,
-// además, los siguientes comandos, que permiten cambiar
-// la precisión:
-//   s: cambia a precisión 'short'.
-//   i: cambia a precisión 'int'
-//   l: cambia a precisión 'long'
-// La ejecución de estos comandos, aparte de cambiar la precision,
-// imprimen por pantalla, respectivamente, PRECISION_SHORT, 
-// PRECISION_INT y PRECISION_LONG.
-// Inicialmente, la precisión es 'long'. 
-
-enum TPrecision { SHORT, INT, LONG };
-
-// Lee una fraccion de la entrada estandar
-template <class T>
-Racional<T> leeFraccion() {
-	T numer, denom;
+    
+   // Lee una fraccion de la entrada estandar
+Racional leeFraccion() {
+	long numer, denom;
 	char sdiv;
 	cin >> numer >> sdiv >> denom;
-	return Racional<T>(numer, denom);
+	return Racional(numer, denom);
 }
-
-template <class T>
-void procesaOperacion(const string &comando) {
-	try {
-		Racional<T> arg1 = leeFraccion<T>();
-		Racional<T> arg2 = leeFraccion<T>();
-		// Se ejecuta el comando
-		switch (comando[0]) {
-		case '+':
-			cout << arg1.suma(arg2) << endl;
-			break;
-		case '-':
-			cout << arg1 - arg2 << endl;
-			break;
-		case '*':
-			arg1 *= arg2;
-			cout << arg1 << endl;
-			break;
-		case '/':
-			arg1.divideYActualiza(arg2);
-			cout << arg1 << endl;
-			break;
-		case '=':
-			cout << (arg1 == arg2) << endl;
-			break;
-		}
-	}
-	catch (typename Racional<T>::EDenominadorCero) {
-		cout << "ERROR_EN_ARGUMENTO" << endl;
-		string resto_linea;
-		getline(cin, resto_linea);
-	}
-	catch (typename Racional<T>::EDivisionPorCero) {
-		cout << "DIVISION_POR_CERO" << endl;
-	}
-}
-
 
 int main() {
 	string comando;
 	cout << boolalpha;
-	TPrecision precision = LONG;
-	// Se ejecutan los comandos
-	while (cin >> comando) {
-		switch (comando[0]) {
-		case 's':
-			precision = SHORT;
-			cout << "PRECISION_SHORT" << endl;
-			break;
-		case 'i':
-			precision = INT;
-			cout << "PRECISION_INT" << endl;
-			break;
-		case 'l':
-			precision = LONG;
-			cout << "PRECISION_LONG" << endl;
-			break;
-		default:
-			switch (precision) {
-			case SHORT: procesaOperacion<short>(comando); break;
-			case INT: procesaOperacion<int>(comando); break;
-			case LONG: procesaOperacion<long>(comando); break;
-			}
-		}
-	}
+	  // Se ejecutan los comandos
+	  while (cin >> comando) {
+		try{  
+		  // En 'comando' estara el comando leido
+		  Racional arg1 = leeFraccion();
+		  Racional arg2 = leeFraccion();
+	      // Se ejecuta el comando
+	      switch (comando[0]) {
+			  case '+':
+				  cout << arg1.suma(arg2) << endl;
+				  break;
+			  case '-':
+				  cout << arg1 - arg2 << endl;
+				  break;
+			  case '*':
+				  arg1 *= arg2;
+				  cout << arg1 << endl;
+				  break;
+			  case '/':
+			      arg1.divideYActualiza(arg2);
+			      cout << arg1 << endl;
+				  break;
+			  case '=':
+				  cout << (arg1 == arg2) << endl;
+				  break;
+
+			  }
+		  }
+		  catch(Racional::EDenominadorCero) {
+			 cout <<  "ERROR_EN_ARGUMENTO" << endl;
+			 string resto_linea;
+			 getline(cin,resto_linea);
+		  }
+		  catch(Racional::EDivisionPorCero) {
+			 cout <<  "DIVISION_POR_CERO" << endl;
+		   }
+	  }
 }
+
+
 
