@@ -1,74 +1,89 @@
-#include "Racional.h"
+#include "Foro.h"
 
-   // Codigo de prueba
-   // Procesa un archivo de entrada que incluye 0 o mas comandos de las siguiente formas: 
-   //      + f1 f2
-   //      - f1 f2
-   //      * f1 f2
-   //      / f1 f2
-   //      == f1 f2
-   // donde f1 y f2 son fracciones. Los numeradores y denominadores siempre estan en el
-   // rango de 'long', pero no se garantiza que las fracciones sean validas (puede
-   // haber fracciones con 0 en el denominador), ni que sean irreducibles.
-   // Los comandos se procesan, en orden de aparicion, como sigue:
-   //         (1) "+ f1 f1", "- f1 f1" y "* f1 f2" realiza la operacion con
-   //             las fracciones indicadas y escriben el resultado. 
-   //         (2) "/ f1 f2" se comporta igual, salvo que, si se detecta division por 0,
-   //             se escribe DIVISION_POR_CERO.
-   //         (4) "== f1 f2" compara f1 con f2 y escribe el resultado
-   //  Si durante el proceso se encuentra una fraccion no valida, se escribe
-   //       ERROR_EN_ARGUMENTO
+#include <iostream>
+#include <string>
+using namespace std;
 
-    
-   // Lee una fraccion de la entrada estandar
-Racional leeFraccion() {
-	long numer, denom;
-	char sdiv;
-	cin >> numer >> sdiv >> denom;
-	return Racional(numer, denom);
+void muestra_mensaje(const Mensaje& m) {
+	cout << "ID:" << m.id() << endl;
+	cout << "REMITENTE:" << m.remitente() << endl;
+	cout << "ASUNTO:" << m.asunto() << endl;
+	cout << "CUERPO:" << m.cuerpo() << endl;
+	cout << "---" << endl;
+}
+
+void muestra_mensajes(const Foro& foro, const Lista<MID>& mensajes) {
+	Lista<MID>::ConstIterator p = mensajes.cbegin();
+	while (p != mensajes.cend()) {
+		muestra_mensaje(foro.consulta_mensaje(p.elem()));
+		p.next();
+	}
+}
+
+void muestra_foro(const Foro& foro) {
+	muestra_mensajes(foro, foro.recupera_mensajes(foro.numero_mensajes()));
+}
+
+void ultimos_mensajes(Foro& foro) {
+	unsigned int n;
+	cin >> n;
+	string nada;
+	getline(cin, nada);
+	muestra_mensajes(foro, foro.recupera_mensajes(n));
+}
+
+void elimina_mensaje(Foro& foro) {
+	MID id;
+	cin >> id;
+	string nada;
+	getline(cin, nada);
+	foro.elimina_mensaje(id);
+	muestra_foro(foro);
+}
+
+void consulta_mensaje(const Foro& foro) {
+	MID id;
+	cin >> id;
+	string nada;
+	getline(cin, nada);
+	try {
+		muestra_mensaje(foro.consulta_mensaje(id));
+	}
+	catch (ENoHayMensaje) {
+		cout << "MENSAJE_NO_EXISTE" << endl;
+	}
+}
+
+void envia_mensaje(Foro& foro) {
+	string nada;
+	getline(cin, nada);
+	int id;
+	cin >> id;
+	getline(cin, nada);
+	string remitente;
+	string asunto;
+	string cuerpo;
+	getline(cin, remitente);
+	getline(cin, asunto);
+	getline(cin, cuerpo);
+	try {
+		foro.envia_mensaje(id, remitente, asunto, cuerpo);
+		muestra_foro(foro);
+	}
+	catch (EMIDDuplicado) {
+		cout << "MENSAJE_DUPLICADO" << endl;
+	}
 }
 
 int main() {
+	Foro foro;
 	string comando;
-	cout << boolalpha;
-	  // Se ejecutan los comandos
-	  while (cin >> comando) {
-		try{  
-		  // En 'comando' estara el comando leido
-		  Racional arg1 = leeFraccion();
-		  Racional arg2 = leeFraccion();
-	      // Se ejecuta el comando
-	      switch (comando[0]) {
-			  case '+':
-				  cout << arg1.suma(arg2) << endl;
-				  break;
-			  case '-':
-				  cout << arg1 - arg2 << endl;
-				  break;
-			  case '*':
-				  arg1 *= arg2;
-				  cout << arg1 << endl;
-				  break;
-			  case '/':
-			      arg1.divideYActualiza(arg2);
-			      cout << arg1 << endl;
-				  break;
-			  case '=':
-				  cout << (arg1 == arg2) << endl;
-				  break;
-
-			  }
-		  }
-		  catch(Racional::EDenominadorCero) {
-			 cout <<  "ERROR_EN_ARGUMENTO" << endl;
-			 string resto_linea;
-			 getline(cin,resto_linea);
-		  }
-		  catch(Racional::EDivisionPorCero) {
-			 cout <<  "DIVISION_POR_CERO" << endl;
-		   }
-	  }
+	while (cin >> comando) {
+		if (comando == "envia") envia_mensaje(foro);
+		else if (comando == "consulta") consulta_mensaje(foro);
+		else if (comando == "elimina") elimina_mensaje(foro);
+		else if (comando == "ultimos") ultimos_mensajes(foro);
+	}
+	system("PAUSE");
+	return 0;
 }
-
-
-
